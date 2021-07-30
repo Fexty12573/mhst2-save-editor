@@ -16,3 +16,11 @@ In a normal steam install, your save will be located at
 C:/Program Files/Steam/userdata/<steamid3>/1277400/remote
 ```
 
+## Build
+I used vcpkg for dependencies so you'll either have to install those yourself or manually add the dependencies.
+
+Installing the packages:
+```
+$ vcpkg install imgui imgui-sfml sfml --triplet=x86-windows
+```
+
