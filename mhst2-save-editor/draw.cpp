@@ -4,6 +4,8 @@
 
 #include "Monsters.h"
 #include "Genes.h"
+#include "TalismanSkills.h"
+#include "EquipmentType.h"
 
 #include <imgui.h>
 #include <Windows.h>
@@ -16,6 +18,7 @@ void DrawSaveFileWindow();
 void DrawEggEditorWindow();
 void DrawMonstieEditorWindow();
 void DrawPlayerEditorWindow();
+void DrawTalismanEditorWindow();
 
 bool has_input_file = false;
 bool show_unknowns = false;
@@ -27,7 +30,8 @@ enum class Tab
 	SAVE_FILE,
 	EGG_EDITOR,
 	MONSTIE_EDITOR,
-	PLAYER_EDITOR
+	PLAYER_EDITOR,
+	TALISMAN_EDITOR
 };
 
 void DrawMainWindow()
@@ -53,6 +57,10 @@ void DrawMainWindow()
 	{
 		selected_tab = Tab::PLAYER_EDITOR;
 	}
+	if (TabItemButton("Talisman Editor"))
+	{
+		selected_tab = Tab::TALISMAN_EDITOR;
+	}
 
 	EndTabBar();
 
@@ -62,6 +70,7 @@ void DrawMainWindow()
 	case Tab::EGG_EDITOR: DrawEggEditorWindow(); break;
 	case Tab::MONSTIE_EDITOR: DrawMonstieEditorWindow(); break;
 	case Tab::PLAYER_EDITOR: DrawPlayerEditorWindow(); break;
+	case Tab::TALISMAN_EDITOR: DrawTalismanEditorWindow(); break;
 	default: break;
 	}
 }
@@ -462,6 +471,99 @@ void DrawPlayerEditorWindow()
 	ImGui::InputScalar("Level", ImGuiDataType_U16, &p.level);
 	ImGui::InputScalar("Exp", ImGuiDataType_U32, &p.exp);
 	ImGui::InputScalar("Zenny", ImGuiDataType_U32, &sd::zenny);
+
+	ImGui::EndGroup();
+}
+
+void DrawTalismanEditorWindow()
+{
+	ImGui::BeginGroup();
+
+	static int selected_index = 0;
+	if (ImGui::BeginCombo("Talisman Box", std::to_string(selected_index).c_str()))
+	{
+		for (int i = 0; i < TALISMAN_MAX_COUNT; i++)
+		{
+			sd::Talisman& t = sd::talismans[i];
+			std::string label = std::to_string(i) + " " + GetSkillName(t.skill1) + ", " + GetSkillName(t.skill2);
+			if (ImGui::Selectable(label.c_str(), i == selected_index))
+			{
+				selected_index = i;
+			}
+		}
+
+		ImGui::EndCombo();
+	}
+
+	sd::Talisman& t = sd::talismans[selected_index];
+
+	if (ImGui::BeginCombo("Equipment Type", eq_type.at(t.equipment_type)))
+	{
+		for (const auto& [id, name] : eq_type)
+		{
+			if (ImGui::Selectable(name, id == t.equipment_type))
+			{
+				t.equipment_type = id;
+			}
+		}
+
+		ImGui::EndCombo();
+	}
+
+	ImGui::InputScalar("Base ID", ImGuiDataType_U16, &t.type);
+	ImGui::InputScalar("Level", ImGuiDataType_U16, &t.level);
+
+	if (show_unknowns)
+	{
+		ImGui::InputScalar("Unk0", ImGuiDataType_U16, &t.unk0);
+		ImGui::InputScalarN("Unk1", ImGuiDataType_S32, t.unk1, 2);
+		ImGui::InputScalar("Unk2", ImGuiDataType_U8, &t.unk2);
+		ImGui::InputScalarN("Unk3", ImGuiDataType_S32, t.unk3, 5);
+		ImGui::InputScalar("Unk4", ImGuiDataType_S32, &t.unk4);
+	}
+	
+	ImGui::Checkbox("Equipped", &t.equipped);
+
+
+	if (ImGui::BeginCombo("Skill 1", GetSkillName(t.skill1)))
+	{
+		if (ImGui::Selectable("Empty", t.skill1 == 0))
+		{
+			t.skill1 = 0;
+		}
+
+		for (int i = 0; i < skill_names.size(); i++)
+		{
+			u16 skl_id = i + 3000;
+
+			if (ImGui::Selectable(skill_names[i], skl_id == t.skill1))
+			{
+				t.skill1 = skl_id;
+			}
+		}
+
+		ImGui::EndCombo();
+	}
+
+	if (ImGui::BeginCombo("Skill 2", GetSkillName(t.skill2)))
+	{
+		if (ImGui::Selectable("Empty", t.skill2 == 0))
+		{
+			t.skill2 = 0;
+		}
+
+		for (int i = 0; i < skill_names.size(); i++)
+		{
+			u16 skl_id = i + 3000;
+
+			if (ImGui::Selectable(skill_names[i], skl_id == t.skill2))
+			{
+				t.skill2 = skl_id;
+			}
+		}
+
+		ImGui::EndCombo();
+	}
 
 	ImGui::EndGroup();
 }

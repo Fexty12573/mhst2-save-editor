@@ -117,7 +117,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>del $(targetdir)$(targetname).pdb</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -141,7 +142,8 @@
       </EntryPointSymbol>
     </Link>
     <PostBuildEvent>
-      <Command>del $(targetdir)$(targetname).pdb</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -180,20 +182,24 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="draw.cpp" />
+    <ClCompile Include="EquipmentType.cpp" />
     <ClCompile Include="Genes.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Monsters.cpp" />
     <ClCompile Include="savedata.cpp" />
+    <ClCompile Include="TalismanSkills.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dependencies\SFColor.h" />
     <ClInclude Include="dependencies\Vec2.h" />
     <ClInclude Include="draw.h" />
+    <ClInclude Include="EquipmentType.h" />
     <ClInclude Include="Genes.h" />
     <ClInclude Include="Monsters.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="savedata.h" />
     <ClInclude Include="setup.h" />
+    <ClInclude Include="TalismanSkills.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="mhst2-save-editor.rc" />

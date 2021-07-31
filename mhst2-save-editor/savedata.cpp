@@ -4,9 +4,12 @@
 #include <cstdio>
 #include <filesystem>
 
-sd::Egg sd::eggs[EGG_MAX_COUNT] = { 0 };
-sd::Monstie sd::monsties[MONSTIE_MAX_COUNT] = { 0 };
-sd::Player sd::players[PLAYER_MAX_COUNT] = { 0 };
+
+
+sd::Egg* sd::eggs = nullptr;
+sd::Monstie* sd::monsties = nullptr;
+sd::Player* sd::players = nullptr;
+sd::Talisman* sd::talismans = nullptr;
 u32 sd::zenny = 0;
 
 #define EGG_OFFSET		0x10CDC		// Implemented
@@ -47,6 +50,9 @@ void sd::ReadFile(const char* filepath)
 	std::fseek(file, PLAYER_OFFSET, SEEK_SET);
 	std::fread(players, sizeof(Player), PLAYER_MAX_COUNT, file);
 
+	std::fseek(file, TALISMAN_OFFSET, SEEK_SET);
+	std::fread(talismans, sizeof(Talisman), TALISMAN_MAX_COUNT, file);
+
 	std::fseek(file, ZENNY_OFFSET, SEEK_SET);
 	std::fread(&zenny, sizeof(u32), 1, file);
 
@@ -71,6 +77,9 @@ void sd::SaveFile(const char* filepath)
 
 	std::fseek(file, PLAYER_OFFSET, SEEK_SET);
 	std::fwrite(players, sizeof(Player), PLAYER_MAX_COUNT, file);
+
+	std::fseek(file, TALISMAN_OFFSET, SEEK_SET);
+	std::fwrite(talismans, sizeof(Talisman), TALISMAN_MAX_COUNT, file);
 
 	std::fseek(file, ZENNY_OFFSET, SEEK_SET);
 	std::fwrite(&zenny, sizeof(u32), 1, file);

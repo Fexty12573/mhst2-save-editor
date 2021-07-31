@@ -7,13 +7,14 @@
 
 #include "setup.h"
 #include "draw.h"
+#include "savedata.h"
 
 #include "dependencies/Vec2.h"
 #include "dependencies/SFColor.h"
 
 int main(int argc, char* argv[])
 {
-	FreeConsole();
+	//FreeConsole();
 
 	sf::RenderWindow window(sf::VideoMode(1280, 720), "Monster Hunter Stories 2 Save Editor", sf::Style::Default);
 	sf::Clock clock;
@@ -22,8 +23,10 @@ int main(int argc, char* argv[])
 	ImGui::SFML::Init(window);
 
 	ImGui::StyleColorsLight();
-	ImGui::svSetFont("./fonts/TCM_____.ttf");
+	//ImGui::svSetFont("./fonts/TCM_____.ttf");
 	ImGui::svSetupLightTheme();
+
+	sd::AllocateArrays();
 
 	while (window.isOpen())
 	{
@@ -55,6 +58,8 @@ int main(int argc, char* argv[])
 		ImGui::SFML::Render(window);
 		window.display();
 	}
+
+	sd::DeleteArrays();
 
 	return 0;
 }

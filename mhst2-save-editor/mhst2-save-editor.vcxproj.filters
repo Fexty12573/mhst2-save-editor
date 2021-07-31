@@ -30,6 +30,12 @@
     <ClCompile Include="Monsters.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TalismanSkills.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EquipmentType.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dependencies\SFColor.h">
@@ -54,6 +60,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TalismanSkills.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EquipmentType.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

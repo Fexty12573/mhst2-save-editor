@@ -111,12 +111,44 @@ namespace sd
 		u8 unk2[100];
 		u32 exp;
 	};
+	struct Talisman
+	{
+		u16 equipment_type;
+		u16 type;
+		u16 level;
+		u16 unk0;
+		s32 unk1[2];
+		u8 unk2;
+		bool equipped;
+		u16 exists;
+		s32 unk3[5];
+		u16 skill1;
+		u16 skill2;
+		s32 unk4;
+	};
 #pragma pack(pop)
 
-	extern Egg eggs[EGG_MAX_COUNT];
-	extern Monstie monsties[MONSTIE_MAX_COUNT];
-	extern Player players[PLAYER_MAX_COUNT];
+	extern Egg* eggs;
+	extern Monstie* monsties;
+	extern Player* players;
+	extern Talisman* talismans;
 	extern u32 zenny;
+
+	inline void AllocateArrays()
+	{
+		eggs = new Egg[EGG_MAX_COUNT];
+		monsties = new Monstie[MONSTIE_MAX_COUNT];
+		players = new Player[PLAYER_MAX_COUNT];
+		talismans = new Talisman[TALISMAN_MAX_COUNT];
+	}
+
+	inline void DeleteArrays()
+	{
+		delete[] eggs;
+		delete[] monsties;
+		delete[] players;
+		delete[] talismans;
+	}
 	
 	void ReadFile(const char* filepath);
 	void SaveFile(const char* filepath);
