@@ -6,6 +6,7 @@
 #include "Genes.h"
 #include "TalismanSkills.h"
 #include "EquipmentType.h"
+#include "FieldAbilities.h"
 
 #include <imgui.h>
 #include <Windows.h>
@@ -22,6 +23,7 @@ void DrawTalismanEditorWindow();
 
 bool has_input_file = false;
 bool show_unknowns = false;
+bool i_know_what_im_doing = false;
 char input_file[260] = { 0 };
 char save_as_file[260] = { 0 };
 
@@ -63,6 +65,11 @@ void DrawMainWindow()
 	}
 
 	EndTabBar();
+
+	if (ImGui::BeginPopup("Warning"))
+	{
+		ImGui::Text("Enable the \"I know what I'm doing\" flag\nin the start menu to edit this.");
+	}
 
 	switch (selected_tab)
 	{
@@ -169,8 +176,29 @@ void DrawSaveFileWindow()
 		ImGui::Text("Please open a file first.");
 		ImGui::EndPopup();
 	}
+	if (ImGui::BeginPopupModal("Are You Sure?", nullptr, ImGuiWindowFlags_Modal))
+	{
+		static auto sameline = [] {ImGui::SameLine(); return false; };
+
+		ImGui::Text("This will enable read-only fields that should normally not be changed.\nAre you sure you want to enable this?");
+		if (ImGui::Button("Yes") || sameline())
+		{
+			ImGui::CloseCurrentPopup();
+		}
+		else if (ImGui::Button("No"))
+		{
+			i_know_what_im_doing = false;
+			ImGui::CloseCurrentPopup();
+		}
+
+		ImGui::EndPopup();
+	}
 
 	ImGui::Checkbox("Show Unknowns", &show_unknowns);
+	if (ImGui::Checkbox("I know what I'm doing", &i_know_what_im_doing) && i_know_what_im_doing)
+	{
+		ImGui::OpenPopup("Are You Sure?");
+	}
 
 	static bool style_editor = false;
 
@@ -201,6 +229,15 @@ const char* const gene_editor_indices[EGG_MAX_COUNT] = {
 	"Gene Editor 1", "Gene Editor 2", "Gene Editor 3", "Gene Editor 4", "Gene Editor 5", "Gene Editor 6",
 	"Gene Editor 7", "Gene Editor 8", "Gene Editor 9", "Gene Editor 10", "Gene Editor 11", "Gene Editor 12"
 };
+const char* const egg_rarities[3] = {
+	"Normal",
+	"Rare",
+	"Super Rare"
+};
+
+#define ADVANCED nullptr, nullptr, nullptr, i_know_what_im_doing ? 0 : ImGuiInputTextFlags_ReadOnly
+#define MAYBE_GREY_OUT() if (!i_know_what_im_doing) ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(.8f, .8f, .8f, 1.0f));
+#define END_GREY_OUT() if (!i_know_what_im_doing) ImGui::PopStyleColor();
 
 void DrawEggEditorWindow()
 {
@@ -223,16 +260,15 @@ void DrawEggEditorWindow()
 	}
 	
 	ImGui::EndGroup();
-
 	ImGui::BeginGroup();
 
 	sd::Egg& egg = sd::eggs[selected_egg];
 
-	if (ImGui::BeginCombo("Monster ID", monster_names[egg.monster_id]))
+	if (ImGui::BeginCombo("Monster ID", MonsterNames[egg.monster_id]))
 	{
-		for (int i = 0; i < monster_names.size(); i++)
+		for (int i = 0; i < MonsterNames.size(); i++)
 		{
-			if (ImGui::Selectable(monster_names[i], i == egg.monster_id))
+			if (ImGui::Selectable(MonsterNames[i], i == egg.monster_id))
 			{
 				egg.monster_id = i;
 			}
@@ -240,8 +276,18 @@ void DrawEggEditorWindow()
 
 		ImGui::EndCombo();
 	}
+	if (ImGui::BeginCombo("Rarity", egg_rarities[egg.rarity]))
+	{
+		for (int i = 0; i < 3; i++)
+		{
+			if (ImGui::Selectable(egg_rarities[i], i == egg.rarity))
+			{
+				egg.rarity = i;
+			}
+		}
 
-	ImGui::InputScalar("Rarity", ImGuiDataType_U32, &egg.rarity);
+		ImGui::EndCombo();
+	}
 
 	for (int i = 0; i < GENES_MAX_COUNT; i++)
 	{
@@ -257,11 +303,11 @@ void DrawEggEditorWindow()
 
 		if (ImGui::BeginPopup(gene_editor_indices[i]))
 		{
-			if (ImGui::BeginCombo("Gene", gene_names[gene.gene_id]))
+			if (ImGui::BeginCombo("Gene", GeneNames[gene.gene_id]))
 			{
-				for (int i = 0; i < gene_names.size(); i++)
+				for (int i = 0; i < GeneNames.size(); i++)
 				{
-					if (ImGui::Selectable(gene_names[i], i == gene.gene_id))
+					if (ImGui::Selectable(GeneNames[i], i == gene.gene_id))
 					{
 						gene.gene_id = i;
 					}
@@ -282,8 +328,11 @@ void DrawEggEditorWindow()
 	}
 
 	ImGui::InputScalar("Den Rank", ImGuiDataType_U16, &egg.den_rank);
-	ImGui::InputScalar("Den Rarity", ImGuiDataType_U16, &egg.den_rarity);
-	ImGui::InputScalar("Den Area", ImGuiDataType_U16, &egg.den_area);
+
+	MAYBE_GREY_OUT();
+	ImGui::InputScalar("Den Rarity", ImGuiDataType_U16, &egg.den_rarity, ADVANCED);
+	ImGui::InputScalar("Den Area", ImGuiDataType_U16, &egg.den_area, ADVANCED);
+	END_GREY_OUT();
 
 	if (show_unknowns)
 	{
@@ -316,7 +365,6 @@ void DrawMonstieEditorWindow()
 	}
 
 	ImGui::EndGroup();
-
 	ImGui::BeginGroup();
 
 	using DT = ImGuiDataType_;
@@ -326,11 +374,11 @@ void DrawMonstieEditorWindow()
 	ImGui::InputText("Name", m.name, sizeof(m.name));
 	ImGui::InputScalar("Sorting ID", DT::ImGuiDataType_U32, &m.sorting_id);
 	
-	if (ImGui::BeginCombo("Monster ID", monster_names[m.monster_id]))
+	if (ImGui::BeginCombo("Monster ID", MonsterNames[m.monster_id]))
 	{
-		for (int i = 0; i < monster_names.size(); i++)
+		for (int i = 0; i < MonsterNames.size(); i++)
 		{
-			if (ImGui::Selectable(monster_names[i], i == m.monster_id))
+			if (ImGui::Selectable(MonsterNames[i], i == m.monster_id))
 			{
 				m.monster_id = i;
 			}
@@ -339,68 +387,116 @@ void DrawMonstieEditorWindow()
 		ImGui::EndCombo();
 	}
 
+	ImGui::InputScalar("Size", DT::ImGuiDataType_U8, &m.size);
+	ImGui::Checkbox("Favorite", &m.favorite);
+
 	ImGui::NewLine();
 
-	ImGui::InputScalar("Ability 1", DT::ImGuiDataType_U8, &m.ability1);
-	ImGui::InputScalar("Ability 2", DT::ImGuiDataType_U8, &m.ability2);
+	ImGui::InputScalar("Kinship Skill ID", DT::ImGuiDataType_U16, &m.kskill_id);
+	ImGui::InputScalar("Starting Kinship", DT::ImGuiDataType_U32, &m.ks_start);
+	ImGui::InputScalar("Unknown Kinship", DT::ImGuiDataType_U64, &m.ks_start2);
+
+	if (ImGui::BeginCombo("Field Ability 1", FieldAbilities[m.ability1]))
+	{
+		for (int i = 0; i < FieldAbilities.size(); i++)
+		{
+			if (ImGui::Selectable(FieldAbilities[i], i == m.ability1))
+			{
+				m.ability1 = i;
+			}
+		}
+
+		ImGui::EndCombo();
+	}
+	if (ImGui::BeginCombo("Field Ability 2", FieldAbilities[m.ability2]))
+	{
+		for (int i = 0; i < FieldAbilities.size(); i++)
+		{
+			if (ImGui::Selectable(FieldAbilities[i], i == m.ability2))
+			{
+				m.ability2 = i;
+			}
+		}
+
+		ImGui::EndCombo();
+	}
 	ImGui::NewLine();
+
+	ImGui::Checkbox("Locked", &m.locked);
+
+	ImGui::InputScalar("Current HP", DT::ImGuiDataType_U32, &m.cur_hp);
+	MAYBE_GREY_OUT();
+	ImGui::InputScalar("Max HP", DT::ImGuiDataType_U32, &m.max_hp, ADVANCED);
+	END_GREY_OUT();
 
 	ImGui::InputScalar("Level", DT::ImGuiDataType_U16, &m.level);
 	ImGui::InputScalar("Exp", DT::ImGuiDataType_U32, &m.exp);
 	ImGui::NewLine();
 
+	MAYBE_GREY_OUT();
 	ImGui::Text("Attack");
-	ImGui::InputScalar("Normal Attack", DT::ImGuiDataType_U16, &m.normal_atk);
-	ImGui::InputScalar("Fire Attack", DT::ImGuiDataType_U16, &m.fire_atk);
-	ImGui::InputScalar("Water Attack", DT::ImGuiDataType_U16, &m.water_atk);
-	ImGui::InputScalar("Thunder Attack", DT::ImGuiDataType_U16, &m.thunder_atk);
-	ImGui::InputScalar("Ice Attack", DT::ImGuiDataType_U16, &m.ice_atk);
-	ImGui::InputScalar("Dragon Attack", DT::ImGuiDataType_U16, &m.dragon_atk);
+	ImGui::InputScalar("Normal Attack", DT::ImGuiDataType_U16, &m.normal_atk, ADVANCED);
+	ImGui::InputScalar("Fire Attack", DT::ImGuiDataType_U16, &m.fire_atk, ADVANCED);
+	ImGui::InputScalar("Water Attack", DT::ImGuiDataType_U16, &m.water_atk, ADVANCED);
+	ImGui::InputScalar("Thunder Attack", DT::ImGuiDataType_U16, &m.thunder_atk, ADVANCED);
+	ImGui::InputScalar("Ice Attack", DT::ImGuiDataType_U16, &m.ice_atk, ADVANCED);
+	ImGui::InputScalar("Dragon Attack", DT::ImGuiDataType_U16, &m.dragon_atk, ADVANCED);
 	ImGui::NewLine();
 
 	ImGui::Text("Defense");
-	ImGui::InputScalar("Normal Defense", DT::ImGuiDataType_U16, &m.normal_def);
-	ImGui::InputScalar("Fire Defense", DT::ImGuiDataType_U16, &m.fire_def);
-	ImGui::InputScalar("Water Defense", DT::ImGuiDataType_U16, &m.water_def);
-	ImGui::InputScalar("Thunder Defense", DT::ImGuiDataType_U16, &m.thunder_def);
-	ImGui::InputScalar("Ice Defense", DT::ImGuiDataType_U16, &m.ice_def);
-	ImGui::InputScalar("Dragon Defense", DT::ImGuiDataType_U16, &m.dragon_def);
+	ImGui::InputScalar("Normal Defense", DT::ImGuiDataType_U16, &m.normal_def, ADVANCED);
+	ImGui::InputScalar("Fire Defense", DT::ImGuiDataType_U16, &m.fire_def, ADVANCED);
+	ImGui::InputScalar("Water Defense", DT::ImGuiDataType_U16, &m.water_def, ADVANCED);
+	ImGui::InputScalar("Thunder Defense", DT::ImGuiDataType_U16, &m.thunder_def, ADVANCED);
+	ImGui::InputScalar("Ice Defense", DT::ImGuiDataType_U16, &m.ice_def, ADVANCED);
+	ImGui::InputScalar("Dragon Defense", DT::ImGuiDataType_U16, &m.dragon_def, ADVANCED);
 	ImGui::NewLine();
+	END_GREY_OUT();
+
+	ImGui::InputScalar("Vitality Nutriments", DT::ImGuiDataType_U8, &m.vit_nutriments);
+	ImGui::InputScalar("Attack Nutriments", DT::ImGuiDataType_U8, &m.atk_nutriments);
+	ImGui::InputScalar("Defense Nutriments", DT::ImGuiDataType_U8, &m.def_nutriments);
 
 	ImGui::InputScalar("HP Bonus", DT::ImGuiDataType_U8, &m.hp_bonus);
 	ImGui::NewLine();
 
 	ImGui::Text("Attack Bonus");
-	ImGui::InputScalar("Normal Attack Bonus", DT::ImGuiDataType_U16, &m.normal_atk_bonus);
-	ImGui::InputScalar("Fire Attack Bonus", DT::ImGuiDataType_U16, &m.fire_atk_bonus);
-	ImGui::InputScalar("Water Attack Bonus", DT::ImGuiDataType_U16, &m.water_atk_bonus);
-	ImGui::InputScalar("Thunder Attack Bonus", DT::ImGuiDataType_U16, &m.thunder_atk_bonus);
-	ImGui::InputScalar("Ice Attack Bonus", DT::ImGuiDataType_U16, &m.ice_atk_bonus);
-	ImGui::InputScalar("Dragon Attack Bonus", DT::ImGuiDataType_U16, &m.dragon_atk_bonus);
+	ImGui::InputScalar("Normal Attack Bonus", DT::ImGuiDataType_U8, &m.normal_atk_bonus);
+	ImGui::InputScalar("Fire Attack Bonus", DT::ImGuiDataType_U8, &m.fire_atk_bonus);
+	ImGui::InputScalar("Water Attack Bonus", DT::ImGuiDataType_U8, &m.water_atk_bonus);
+	ImGui::InputScalar("Thunder Attack Bonus", DT::ImGuiDataType_U8, &m.thunder_atk_bonus);
+	ImGui::InputScalar("Ice Attack Bonus", DT::ImGuiDataType_U8, &m.ice_atk_bonus);
+	ImGui::InputScalar("Dragon Attack Bonus", DT::ImGuiDataType_U8, &m.dragon_atk_bonus);
 	ImGui::NewLine();
 
 	ImGui::Text("Defense Bonus");
-	ImGui::InputScalar("Normal Defense Bonus", DT::ImGuiDataType_U16, &m.normal_def_bonus);
-	ImGui::InputScalar("Fire Defense Bonus", DT::ImGuiDataType_U16, &m.fire_def_bonus);
-	ImGui::InputScalar("Water Defense Bonus", DT::ImGuiDataType_U16, &m.water_def_bonus);
-	ImGui::InputScalar("Thunder Defense Bonus", DT::ImGuiDataType_U16, &m.thunder_def_bonus);
-	ImGui::InputScalar("Ice Defense Bonus", DT::ImGuiDataType_U16, &m.ice_def_bonus);
-	ImGui::InputScalar("Dragon Defense Bonus", DT::ImGuiDataType_U16, &m.dragon_def_bonus);
+	ImGui::InputScalar("Normal Defense Bonus", DT::ImGuiDataType_U8, &m.normal_def_bonus);
+	ImGui::InputScalar("Fire Defense Bonus", DT::ImGuiDataType_U8, &m.fire_def_bonus);
+	ImGui::InputScalar("Water Defense Bonus", DT::ImGuiDataType_U8, &m.water_def_bonus);
+	ImGui::InputScalar("Thunder Defense Bonus", DT::ImGuiDataType_U8, &m.thunder_def_bonus);
+	ImGui::InputScalar("Ice Defense Bonus", DT::ImGuiDataType_U8, &m.ice_def_bonus);
+	ImGui::InputScalar("Dragon Defense Bonus", DT::ImGuiDataType_U8, &m.dragon_def_bonus);
 	ImGui::NewLine();
 
 	if (show_unknowns)
 	{
-		ImGui::InputScalar("Unk0", DT::ImGuiDataType_S32, &m.unk);
-		ImGui::InputScalarN("Unk2", DT::ImGuiDataType_U8, m.unk2, 2);
-		ImGui::InputScalarN("Unk3", DT::ImGuiDataType_S32, m.unk3, 5);
-		ImGui::InputScalar("Unk4", DT::ImGuiDataType_S16, &m.unk4);
-		ImGui::InputScalarN("Unk5", DT::ImGuiDataType_S32, m.unk5, 11);
-		ImGui::InputScalarN("Unk6", DT::ImGuiDataType_S32, m.unk6, 2);
-		ImGui::InputScalar("Unk7", DT::ImGuiDataType_S32, &m.unk7);
-		ImGui::InputScalarN("Unk8", DT::ImGuiDataType_U8, m.unk8, 3);
-		ImGui::InputScalar("Unk9", DT::ImGuiDataType_S32, &m.unk9);
+		ImGui::InputScalar ("Emp  ", DT::ImGuiDataType_U8, &m.emp);
+		ImGui::InputScalar ("Unk01", DT::ImGuiDataType_U8, &m.unk1);
+		ImGui::InputScalar ("Unk02", DT::ImGuiDataType_U8, &m.unk2);
+		ImGui::InputScalarN("Unk03", DT::ImGuiDataType_S32, m.unk3, 2);
+		ImGui::InputScalar ("Unk04", DT::ImGuiDataType_S16, &m.unk4);
+		ImGui::InputScalarN("Unk05", DT::ImGuiDataType_S32, m.unk5, 10);
+		ImGui::InputScalarN("Unk06", DT::ImGuiDataType_S32, m.unk6, 2);
+		ImGui::InputScalar ("Unk07", DT::ImGuiDataType_U8, &m.unk7);
+		ImGui::InputScalarN("Unk08", DT::ImGuiDataType_U8, m.unk8, 3);
+		ImGui::InputScalar ("Unk09", DT::ImGuiDataType_S32, &m.unk9);
 		ImGui::InputScalarN("Unk10", DT::ImGuiDataType_S32, m.unk10, 35);
-		ImGui::InputScalarN("Unk11", DT::ImGuiDataType_S32, m.unk10, 11);
+		ImGui::InputScalarN("Unk11", DT::ImGuiDataType_S32, m.unk11, 2);
+		ImGui::InputFloat  ("Unk12", &m.unk12);
+		ImGui::InputScalar ("Unk13", DT::ImGuiDataType_S16, &m.unk13);
+		ImGui::InputScalarN("Unk14", DT::ImGuiDataType_S32, m.unk14, 2);
+		ImGui::InputScalar ("Unk15", DT::ImGuiDataType_S32, &m.unk15);
+		ImGui::InputScalar ("Unk16", DT::ImGuiDataType_S32, &m.unk16);
 	}
 
 	for (int i = 0; i < GENES_MAX_COUNT; i++)
@@ -417,11 +513,11 @@ void DrawMonstieEditorWindow()
 
 		if (ImGui::BeginPopup(gene_editor_indices[i], ImGuiWindowFlags_MenuBar))
 		{
-			if (ImGui::BeginCombo("Gene", gene_names[gene.gene_id]))
+			if (ImGui::BeginCombo("Gene", GeneNames[gene.gene_id]))
 			{
-				for (int i = 0; i < gene_names.size(); i++)
+				for (int i = 0; i < GeneNames.size(); i++)
 				{
-					if (ImGui::Selectable(gene_names[i], i == gene.gene_id))
+					if (ImGui::Selectable(GeneNames[i], i == gene.gene_id))
 					{
 						gene.gene_id = i;
 					}
@@ -450,7 +546,8 @@ void DrawPlayerEditorWindow()
 
 	int selected_player = 0;
 
-	if (ImGui::BeginCombo("Player", sd::players[selected_player].name))
+	MAYBE_GREY_OUT();
+	if (i_know_what_im_doing && ImGui::BeginCombo("Player", sd::players[selected_player].name))
 	{
 		for (int i = 0; i < PLAYER_MAX_COUNT; i++)
 		{
@@ -464,6 +561,7 @@ void DrawPlayerEditorWindow()
 
 		ImGui::EndCombo();
 	}
+	END_GREY_OUT();
 
 	sd::Player& p = sd::players[selected_player];
 
@@ -497,9 +595,10 @@ void DrawTalismanEditorWindow()
 
 	sd::Talisman& t = sd::talismans[selected_index];
 
-	if (ImGui::BeginCombo("Equipment Type", eq_type.at(t.equipment_type)))
+	MAYBE_GREY_OUT();
+	if (i_know_what_im_doing && ImGui::BeginCombo("Equipment Type", EqType.at(t.equipment_type)))
 	{
-		for (const auto& [id, name] : eq_type)
+		for (const auto& [id, name] : EqType)
 		{
 			if (ImGui::Selectable(name, id == t.equipment_type))
 			{
@@ -509,6 +608,7 @@ void DrawTalismanEditorWindow()
 
 		ImGui::EndCombo();
 	}
+	END_GREY_OUT();
 
 	ImGui::InputScalar("Base ID", ImGuiDataType_U16, &t.type);
 	ImGui::InputScalar("Level", ImGuiDataType_U16, &t.level);
@@ -522,7 +622,27 @@ void DrawTalismanEditorWindow()
 		ImGui::InputScalar("Unk4", ImGuiDataType_S32, &t.unk4);
 	}
 	
-	ImGui::Checkbox("Equipped", &t.equipped);
+	// Cannot display bitfield directly, so move into temporary struct
+	struct { bool pw, sw, tw, as, ts; } equipped = {
+		t.equipped.primary_weapon,
+		t.equipped.secondary_weapon,
+		t.equipped.tertiary_weapon,
+		t.equipped.armor_slot,
+		t.equipped.talisman_slot,
+	};
+
+	ImGui::Text("Equipped");
+	ImGui::Checkbox("Primary Weapon", &equipped.pw);
+	ImGui::Checkbox("Secondary Weapon", &equipped.sw);
+	ImGui::Checkbox("Tertiary Weapon", &equipped.tw);
+	ImGui::Checkbox("Armor Slot", &equipped.as);
+	ImGui::Checkbox("Talisman Slot", &equipped.ts);
+
+	t.equipped.primary_weapon = equipped.pw;
+	t.equipped.secondary_weapon = equipped.sw;
+	t.equipped.tertiary_weapon = equipped.tw;
+	t.equipped.armor_slot = equipped.as;
+	t.equipped.talisman_slot = equipped.ts;
 
 
 	if (ImGui::BeginCombo("Skill 1", GetSkillName(t.skill1)))
@@ -532,11 +652,11 @@ void DrawTalismanEditorWindow()
 			t.skill1 = 0;
 		}
 
-		for (int i = 0; i < skill_names.size(); i++)
+		for (int i = 0; i < SkillNames.size(); i++)
 		{
 			u16 skl_id = i + 3000;
 
-			if (ImGui::Selectable(skill_names[i], skl_id == t.skill1))
+			if (ImGui::Selectable(SkillNames[i], skl_id == t.skill1))
 			{
 				t.skill1 = skl_id;
 			}
@@ -544,7 +664,6 @@ void DrawTalismanEditorWindow()
 
 		ImGui::EndCombo();
 	}
-
 	if (ImGui::BeginCombo("Skill 2", GetSkillName(t.skill2)))
 	{
 		if (ImGui::Selectable("Empty", t.skill2 == 0))
@@ -552,11 +671,11 @@ void DrawTalismanEditorWindow()
 			t.skill2 = 0;
 		}
 
-		for (int i = 0; i < skill_names.size(); i++)
+		for (int i = 0; i < SkillNames.size(); i++)
 		{
 			u16 skl_id = i + 3000;
 
-			if (ImGui::Selectable(skill_names[i], skl_id == t.skill2))
+			if (ImGui::Selectable(SkillNames[i], skl_id == t.skill2))
 			{
 				t.skill2 = skl_id;
 			}

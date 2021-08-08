@@ -1,7 +1,7 @@
 
 #include "Genes.h"
 
-const std::array<const char*, 629> gene_names = {
+const std::array<const char*, 629> GeneNames = {
 	"0	 [No Data/Locked Slot] (N/A)",
 	"1	 [Empty Slot] (N/A)",
 	"2	 [Locked Slot] (N/A)",

@@ -1,7 +1,7 @@
 
 #include "EquipmentType.h"
 
-const std::map<u16, const char*> eq_type = {
+const std::map<u16, const char*> EqType = {
 	{0, "Great Sword"},
 	{1, "Sword And Shield"},
 	{2, "Hammer"},

@@ -183,6 +183,7 @@
   <ItemGroup>
     <ClCompile Include="draw.cpp" />
     <ClCompile Include="EquipmentType.cpp" />
+    <ClCompile Include="FieldAbilities.cpp" />
     <ClCompile Include="Genes.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Monsters.cpp" />
@@ -194,6 +195,7 @@
     <ClInclude Include="dependencies\Vec2.h" />
     <ClInclude Include="draw.h" />
     <ClInclude Include="EquipmentType.h" />
+    <ClInclude Include="FieldAbilities.h" />
     <ClInclude Include="Genes.h" />
     <ClInclude Include="Monsters.h" />
     <ClInclude Include="resource.h" />
@@ -205,7 +207,7 @@
     <ResourceCompile Include="mhst2-save-editor.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="TDS_Fexty.ico" />
+    <Image Include="dreadking-icon.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

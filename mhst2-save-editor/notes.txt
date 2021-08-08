@@ -1,0 +1,36 @@
+{Unequipped=0,
+Primary_Weapon=1, 
+Secondary_Weapon=2, 
+Tertiary_Weapon=4, 
+Armor_Slot=8, 
+Talisman_Slot=16}
+
+
+Should be read-only:
+  Eggs:
+    Den rarity and den area. Both are solely used for the game to display where the egg came from, like "Rare Alcala Den", meaning that not only are they not worth editing, but they also risk crashing the game.
+  Monsties:
+    All the base attack/defense values, since they are never read from by the game, anyways.
+  Talisman:
+    Equipment type, since it will literally just turn the talisman into something like a corrupted piece of armor/weapon.
+
+Small amendments:
+  Eggs:
+    Set rarity to a dropdown. 0: Normal, 1: Rare, 2: Super Rare.
+  Monsties:
+    Abilities could be renamed to something more intuitive, like Field Abilities or Riding Actions.
+    Abilities could also benefit from a dropdown; Enum is in the updated file.
+  Talisman:
+    Haven't checked to make sure, but just want to confirm that you've made the equip checkbox set the value from 0 to 16 (10 in hex). Any other value would equip it in a different slot, like your weapon slots or your armor.
+  Player:
+    Player dropdown menu doesn't really do much, does it?
+
+Additional Read-only points:
+  Kinship skill ID
+  Speed, iirc. Might be worth testing.
+  Max Health (current health is editable, at least)
+Things definitely worth adding:
+  Health stats
+  Speed
+  Monstie Relative Size (Yeah, we figured out how to resize monsties)
+  Nutriment stats (Max 10 of each)

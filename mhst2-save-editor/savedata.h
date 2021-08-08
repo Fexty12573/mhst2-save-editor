@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string.h>
+
 using u8 = unsigned char;
 using s8 = signed char;
 using u16 = unsigned short;
@@ -45,18 +47,30 @@ namespace sd
 		char name[48];
 		u32 sorting_id;
 		u32 monster_id;
-		s32 unk;
+
+		u8 emp;
+		u8 size;
+		bool favorite;
+		u8 unk1;
 
 		u8 ability1;
 		u8 ability2;
 
-		u8 unk2[2];
-		s32 unk3[5];
+		u8 unk2;
+		bool locked;
+
+		s32 unk3[2];
+
+		u32 cur_hp;
+		u32 max_hp;
+		u32 speed;
+
 		s16 unk4;
 
 		u16 level;
 
-		s32 unk5[11];
+		float unk12;
+		s32 unk5[10];
 
 		u16 normal_atk;
 		u16 fire_atk;
@@ -74,23 +88,26 @@ namespace sd
 		u16 ice_def;
 		u16 dragon_def;
 
-		s32 unk7;
+		u8 vit_nutriments;
+		u8 atk_nutriments;
+		u8 def_nutriments;
+		u8 unk7;
 
 		u8 hp_bonus;
 
-		u8 normal_atk_bonus;
-		u8 fire_atk_bonus;
-		u8 water_atk_bonus;
-		u8 thunder_atk_bonus;
-		u8 ice_atk_bonus;
-		u8 dragon_atk_bonus;
+		s8 normal_atk_bonus;
+		s8 fire_atk_bonus;
+		s8 water_atk_bonus;
+		s8 thunder_atk_bonus;
+		s8 ice_atk_bonus;
+		s8 dragon_atk_bonus;
 
-		u8 normal_def_bonus;
-		u8 fire_def_bonus;
-		u8 water_def_bonus;
-		u8 thunder_def_bonus;
-		u8 ice_def_bonus;
-		u8 dragon_def_bonus;
+		s8 normal_def_bonus;
+		s8 fire_def_bonus;
+		s8 water_def_bonus;
+		s8 thunder_def_bonus;
+		s8 ice_def_bonus;
+		s8 dragon_def_bonus;
 
 		u8 unk8[3];
 		s32 unk9;
@@ -101,7 +118,15 @@ namespace sd
 
 		Gene genes[GENES_MAX_COUNT];
 
-		s32 unk11[11];
+		s32 unk11[2];
+
+		u16 kskill_id;
+		s16 unk13;
+		s32 unk14[3];
+		u32 ks_start;
+		s32 unk15;
+		u64 ks_start2;
+		s32 unk16;
 	};
 	struct Player
 	{
@@ -119,7 +144,17 @@ namespace sd
 		u16 unk0;
 		s32 unk1[2];
 		u8 unk2;
-		bool equipped;
+		union {
+			struct {
+				bool primary_weapon : 1;
+				bool secondary_weapon : 1;
+				bool tertiary_weapon : 1;
+				bool armor_slot : 1;
+				bool talisman_slot : 1;
+				bool : 3;
+			} equipped;
+			u8 _equipped; // Full byte
+		};
 		u16 exists;
 		s32 unk3[5];
 		u16 skill1;
@@ -140,6 +175,11 @@ namespace sd
 		monsties = new Monstie[MONSTIE_MAX_COUNT];
 		players = new Player[PLAYER_MAX_COUNT];
 		talismans = new Talisman[TALISMAN_MAX_COUNT];
+
+		memset(eggs, 0, sizeof(Egg) * EGG_MAX_COUNT);
+		memset(monsties, 0, sizeof(Monstie) * MONSTIE_MAX_COUNT);
+		memset(players, 0, sizeof(Player) * PLAYER_MAX_COUNT);
+		memset(talismans, 0, sizeof(Talisman) * TALISMAN_MAX_COUNT);
 	}
 
 	inline void DeleteArrays()

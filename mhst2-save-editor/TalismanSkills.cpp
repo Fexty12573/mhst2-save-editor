@@ -1,7 +1,7 @@
 
 #include "TalismanSkills.h"
 
-const std::array<const char*, 316> skill_names = {
+const std::array<const char*, 316> SkillNames = {
 	"3000 Health S",
 	"3001 Health M",
 	"3002 Health L",

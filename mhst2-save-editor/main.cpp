@@ -14,7 +14,7 @@
 
 int main(int argc, char* argv[])
 {
-	//FreeConsole();
+	FreeConsole();
 
 	sf::RenderWindow window(sf::VideoMode(1280, 720), "Monster Hunter Stories 2 Save Editor", sf::Style::Default);
 	sf::Clock clock;
@@ -23,7 +23,11 @@ int main(int argc, char* argv[])
 	ImGui::SFML::Init(window);
 
 	ImGui::StyleColorsLight();
-	//ImGui::svSetFont("./fonts/TCM_____.ttf");
+#if defined(_DEBUG)
+	ImGui::svSetFont("../Release/fonts/TCM_____.ttf");
+#else
+	ImGui::svSetFont("./fonts/TCM_____.ttf");
+#endif
 	ImGui::svSetupLightTheme();
 
 	sd::AllocateArrays();

@@ -36,6 +36,9 @@
     <ClCompile Include="EquipmentType.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="FieldAbilities.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dependencies\SFColor.h">
@@ -59,13 +62,16 @@
     <ClInclude Include="Genes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="resource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="TalismanSkills.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="EquipmentType.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FieldAbilities.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -75,7 +81,7 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="TDS_Fexty.ico">
+    <Image Include="dreadking-icon.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

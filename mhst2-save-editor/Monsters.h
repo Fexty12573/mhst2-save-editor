@@ -2,4 +2,4 @@
 
 #include <array>
 
-extern const std::array<const char*, 184> monster_names;
+extern const std::array<const char*, 184> MonsterNames;

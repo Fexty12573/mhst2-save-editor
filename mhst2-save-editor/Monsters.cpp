@@ -1,7 +1,7 @@
 
 #include "Monsters.h"
 
-const std::array<const char*, 184> monster_names = {
+const std::array<const char*, 184> MonsterNames = {
 	"0 None",
 	"1 Velocidrome",
 	"2 Rathian",
