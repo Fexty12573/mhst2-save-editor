@@ -288,6 +288,7 @@ void DrawEggEditorWindow()
 
 		ImGui::EndCombo();
 	}
+	ImGui::Checkbox("Exists", &egg.exists);
 
 	for (int i = 0; i < GENES_MAX_COUNT; i++)
 	{
@@ -337,7 +338,6 @@ void DrawEggEditorWindow()
 	if (show_unknowns)
 	{
 		ImGui::InputScalarN("Unk0", ImGuiDataType_S32, &egg.unk, 5);
-		ImGui::InputScalar("Unk1", ImGuiDataType_U16, &egg.unk1);
 		ImGui::InputScalarN("Unk2", ImGuiDataType_S32, egg.unk2, 3);
 	}
 
@@ -392,9 +392,11 @@ void DrawMonstieEditorWindow()
 
 	ImGui::NewLine();
 
-	ImGui::InputScalar("Kinship Skill ID", DT::ImGuiDataType_U16, &m.kskill_id);
-	ImGui::InputScalar("Starting Kinship", DT::ImGuiDataType_U32, &m.ks_start);
-	ImGui::InputScalar("Unknown Kinship", DT::ImGuiDataType_U64, &m.ks_start2);
+	MAYBE_GREY_OUT();
+	ImGui::InputScalar("Kinship Skill ID", DT::ImGuiDataType_U16, &m.kskill_id, ADVANCED);
+	ImGui::InputScalar("Starting Kinship", DT::ImGuiDataType_U32, &m.ks_start, ADVANCED);
+	ImGui::InputScalar("Unknown Kinship", DT::ImGuiDataType_U64, &m.ks_start2, ADVANCED);
+	END_GREY_OUT();
 
 	if (ImGui::BeginCombo("Field Ability 1", FieldAbilities[m.ability1]))
 	{
@@ -461,21 +463,21 @@ void DrawMonstieEditorWindow()
 	ImGui::NewLine();
 
 	ImGui::Text("Attack Bonus");
-	ImGui::InputScalar("Normal Attack Bonus", DT::ImGuiDataType_U8, &m.normal_atk_bonus);
-	ImGui::InputScalar("Fire Attack Bonus", DT::ImGuiDataType_U8, &m.fire_atk_bonus);
-	ImGui::InputScalar("Water Attack Bonus", DT::ImGuiDataType_U8, &m.water_atk_bonus);
-	ImGui::InputScalar("Thunder Attack Bonus", DT::ImGuiDataType_U8, &m.thunder_atk_bonus);
-	ImGui::InputScalar("Ice Attack Bonus", DT::ImGuiDataType_U8, &m.ice_atk_bonus);
-	ImGui::InputScalar("Dragon Attack Bonus", DT::ImGuiDataType_U8, &m.dragon_atk_bonus);
+	ImGui::InputScalar("Normal Attack Bonus", DT::ImGuiDataType_S8, &m.normal_atk_bonus);
+	ImGui::InputScalar("Fire Attack Bonus", DT::ImGuiDataType_S8, &m.fire_atk_bonus);
+	ImGui::InputScalar("Water Attack Bonus", DT::ImGuiDataType_S8, &m.water_atk_bonus);
+	ImGui::InputScalar("Thunder Attack Bonus", DT::ImGuiDataType_S8, &m.thunder_atk_bonus);
+	ImGui::InputScalar("Ice Attack Bonus", DT::ImGuiDataType_S8, &m.ice_atk_bonus);
+	ImGui::InputScalar("Dragon Attack Bonus", DT::ImGuiDataType_S8, &m.dragon_atk_bonus);
 	ImGui::NewLine();
 
 	ImGui::Text("Defense Bonus");
-	ImGui::InputScalar("Normal Defense Bonus", DT::ImGuiDataType_U8, &m.normal_def_bonus);
-	ImGui::InputScalar("Fire Defense Bonus", DT::ImGuiDataType_U8, &m.fire_def_bonus);
-	ImGui::InputScalar("Water Defense Bonus", DT::ImGuiDataType_U8, &m.water_def_bonus);
-	ImGui::InputScalar("Thunder Defense Bonus", DT::ImGuiDataType_U8, &m.thunder_def_bonus);
-	ImGui::InputScalar("Ice Defense Bonus", DT::ImGuiDataType_U8, &m.ice_def_bonus);
-	ImGui::InputScalar("Dragon Defense Bonus", DT::ImGuiDataType_U8, &m.dragon_def_bonus);
+	ImGui::InputScalar("Normal Defense Bonus", DT::ImGuiDataType_S8, &m.normal_def_bonus);
+	ImGui::InputScalar("Fire Defense Bonus", DT::ImGuiDataType_S8, &m.fire_def_bonus);
+	ImGui::InputScalar("Water Defense Bonus", DT::ImGuiDataType_S8, &m.water_def_bonus);
+	ImGui::InputScalar("Thunder Defense Bonus", DT::ImGuiDataType_S8, &m.thunder_def_bonus);
+	ImGui::InputScalar("Ice Defense Bonus", DT::ImGuiDataType_S8, &m.ice_def_bonus);
+	ImGui::InputScalar("Dragon Defense Bonus", DT::ImGuiDataType_S8, &m.dragon_def_bonus);
 	ImGui::NewLine();
 
 	if (show_unknowns)
@@ -621,29 +623,16 @@ void DrawTalismanEditorWindow()
 		ImGui::InputScalarN("Unk3", ImGuiDataType_S32, t.unk3, 5);
 		ImGui::InputScalar("Unk4", ImGuiDataType_S32, &t.unk4);
 	}
-	
-	// Cannot display bitfield directly, so move into temporary struct
-	struct { bool pw, sw, tw, as, ts; } equipped = {
-		t.equipped.primary_weapon,
-		t.equipped.secondary_weapon,
-		t.equipped.tertiary_weapon,
-		t.equipped.armor_slot,
-		t.equipped.talisman_slot,
-	};
 
 	ImGui::Text("Equipped");
-	ImGui::Checkbox("Primary Weapon", &equipped.pw);
-	ImGui::Checkbox("Secondary Weapon", &equipped.sw);
-	ImGui::Checkbox("Tertiary Weapon", &equipped.tw);
-	ImGui::Checkbox("Armor Slot", &equipped.as);
-	ImGui::Checkbox("Talisman Slot", &equipped.ts);
+	if (ImGui::RadioButton("Primary Weapon", t._equipped == 0x1))	t._equipped = 0x01; // 1 << 0
+	if (ImGui::RadioButton("Secondary Weapon", t._equipped == 0x2)) t._equipped = 0x02;	// 1 << 1
+	if (ImGui::RadioButton("Tertiary Weapon", t._equipped == 0x4))	t._equipped = 0x04;	// 1 << 2
+	if (ImGui::RadioButton("Armor Slot", t._equipped == 0x8))		t._equipped = 0x08;	// 1 << 3
+	if (ImGui::RadioButton("Talisman Slot", t._equipped == 0x10))	t._equipped = 0x10;	// 1 << 4
 
-	t.equipped.primary_weapon = equipped.pw;
-	t.equipped.secondary_weapon = equipped.sw;
-	t.equipped.tertiary_weapon = equipped.tw;
-	t.equipped.armor_slot = equipped.as;
-	t.equipped.talisman_slot = equipped.ts;
-
+	ImGui::Checkbox("Exists", (bool*)&t.exists);
+	ImGui::InputScalar("Rarity", ImGuiDataType_U32, &t.rarity);
 
 	if (ImGui::BeginCombo("Skill 1", GetSkillName(t.skill1)))
 	{

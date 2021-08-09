@@ -36,7 +36,7 @@ namespace sd
 		s32 unk[5];
 		u32 den_rank;
 		u8 den_rarity;
-		u8 unk1;
+		bool exists;
 		s16 empty;
 		u32 den_area;
 		u32 unk2[3];
@@ -156,7 +156,8 @@ namespace sd
 			u8 _equipped; // Full byte
 		};
 		u16 exists;
-		s32 unk3[5];
+		s32 unk3[4];
+		u32 rarity;
 		u16 skill1;
 		u16 skill2;
 		s32 unk4;
