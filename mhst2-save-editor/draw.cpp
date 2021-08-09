@@ -215,6 +215,14 @@ void DrawSaveFileWindow()
 		ImGui::ShowStyleEditor();
 		ImGui::End();
 	}
+
+	ImGui::NewLine();
+
+	ImGui::Text("Save Editor for Monster Hunter Stories 2 made by Fexty.");
+	ImGui::Text("Save File mapped by DSC-173.");
+	ImGui::NewLine();
+	ImGui::Text("Use at your own risk. I am not responsible if you mess up your save by using this.");
+	ImGui::TextColored(ImVec4(1, 0, 0, 1), "Always make a backup of your save!");
 }
 
 const char* const egg_indices[EGG_MAX_COUNT] = {
@@ -230,9 +238,14 @@ const char* const gene_editor_indices[EGG_MAX_COUNT] = {
 	"Gene Editor 7", "Gene Editor 8", "Gene Editor 9", "Gene Editor 10", "Gene Editor 11", "Gene Editor 12"
 };
 const char* const egg_rarities[3] = {
-	"Normal",
+	"Common",
 	"Rare",
 	"Super Rare"
+};
+const char* const den_ranks[3] = {
+	"None",
+	"Low Rank",
+	"High Rank"
 };
 
 #define ADVANCED nullptr, nullptr, nullptr, i_know_what_im_doing ? 0 : ImGuiInputTextFlags_ReadOnly
@@ -328,16 +341,27 @@ void DrawEggEditorWindow()
 		if ((i + 1) % 3) ImGui::SameLine();
 	}
 
-	ImGui::InputScalar("Den Rank", ImGuiDataType_U16, &egg.den_rank);
+	if (ImGui::BeginCombo("Den Rank", den_ranks[egg.den_rank]))
+	{
+		for (u32 i = 0; i < 3; i++)
+		{
+			if (ImGui::Selectable(den_ranks[i], i == egg.den_rank))
+			{
+				egg.den_rank = i;
+			}
+		}
+
+		ImGui::EndCombo();
+	}
 
 	MAYBE_GREY_OUT();
-	ImGui::InputScalar("Den Rarity", ImGuiDataType_U16, &egg.den_rarity, ADVANCED);
-	ImGui::InputScalar("Den Area", ImGuiDataType_U16, &egg.den_area, ADVANCED);
+	ImGui::InputScalar("Den Rarity", ImGuiDataType_U8, &egg.den_rarity, ADVANCED);
+	ImGui::InputScalar("Den Area", ImGuiDataType_U32, &egg.den_area, ADVANCED);
 	END_GREY_OUT();
 
 	if (show_unknowns)
 	{
-		ImGui::InputScalarN("Unk0", ImGuiDataType_S32, &egg.unk, 5);
+		ImGui::InputScalarN("Unk0", ImGuiDataType_S32, egg.unk, 5);
 		ImGui::InputScalarN("Unk2", ImGuiDataType_S32, egg.unk2, 3);
 	}
 
@@ -395,7 +419,7 @@ void DrawMonstieEditorWindow()
 	MAYBE_GREY_OUT();
 	ImGui::InputScalar("Kinship Skill ID", DT::ImGuiDataType_U16, &m.kskill_id, ADVANCED);
 	ImGui::InputScalar("Starting Kinship", DT::ImGuiDataType_U32, &m.ks_start, ADVANCED);
-	ImGui::InputScalar("Unknown Kinship", DT::ImGuiDataType_U64, &m.ks_start2, ADVANCED);
+	ImGui::InputScalar("Unknown Kinship", DT::ImGuiDataType_S64, &m.ks_start2, ADVANCED);
 	END_GREY_OUT();
 
 	if (ImGui::BeginCombo("Field Ability 1", FieldAbilities[m.ability1]))
@@ -625,6 +649,7 @@ void DrawTalismanEditorWindow()
 	}
 
 	ImGui::Text("Equipped");
+	if (ImGui::RadioButton("Not Equipped", t._equipped == 0x0))		t._equipped = 0x00; // 1 << 8
 	if (ImGui::RadioButton("Primary Weapon", t._equipped == 0x1))	t._equipped = 0x01; // 1 << 0
 	if (ImGui::RadioButton("Secondary Weapon", t._equipped == 0x2)) t._equipped = 0x02;	// 1 << 1
 	if (ImGui::RadioButton("Tertiary Weapon", t._equipped == 0x4))	t._equipped = 0x04;	// 1 << 2
