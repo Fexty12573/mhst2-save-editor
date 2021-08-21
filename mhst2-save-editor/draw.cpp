@@ -7,6 +7,7 @@
 #include "TalismanSkills.h"
 #include "EquipmentType.h"
 #include "FieldAbilities.h"
+#include "Items.h"
 
 #include <imgui.h>
 #include <Windows.h>
@@ -20,6 +21,10 @@ void DrawEggEditorWindow();
 void DrawMonstieEditorWindow();
 void DrawPlayerEditorWindow();
 void DrawTalismanEditorWindow();
+void DrawItemEditorWindow();
+
+
+void DrawHelpSection();
 
 bool has_input_file = false;
 bool show_unknowns = false;
@@ -33,7 +38,11 @@ enum class Tab
 	EGG_EDITOR,
 	MONSTIE_EDITOR,
 	PLAYER_EDITOR,
-	TALISMAN_EDITOR
+	TALISMAN_EDITOR,
+	ITEM_EDITOR,
+
+
+	HELP_SECTION
 };
 
 void DrawMainWindow()
@@ -63,6 +72,14 @@ void DrawMainWindow()
 	{
 		selected_tab = Tab::TALISMAN_EDITOR;
 	}
+	if (TabItemButton("Item Editor"))
+	{
+		selected_tab = Tab::ITEM_EDITOR;
+	}
+	/*if (TabItemButton("Help"))
+	{
+		selected_tab = Tab::HELP_SECTION;
+	}*/
 
 	EndTabBar();
 
@@ -78,6 +95,8 @@ void DrawMainWindow()
 	case Tab::MONSTIE_EDITOR: DrawMonstieEditorWindow(); break;
 	case Tab::PLAYER_EDITOR: DrawPlayerEditorWindow(); break;
 	case Tab::TALISMAN_EDITOR: DrawTalismanEditorWindow(); break;
+	case Tab::ITEM_EDITOR: DrawItemEditorWindow(); break;
+	case Tab::HELP_SECTION: DrawHelpSection(); break;
 	default: break;
 	}
 }
@@ -649,7 +668,7 @@ void DrawTalismanEditorWindow()
 	}
 
 	ImGui::Text("Equipped");
-	if (ImGui::RadioButton("Not Equipped", t._equipped == 0x0))		t._equipped = 0x00; // 1 << 8
+	if (ImGui::RadioButton("Not Equipped", t._equipped == 0x0))		t._equipped = 0x00; // 0
 	if (ImGui::RadioButton("Primary Weapon", t._equipped == 0x1))	t._equipped = 0x01; // 1 << 0
 	if (ImGui::RadioButton("Secondary Weapon", t._equipped == 0x2)) t._equipped = 0x02;	// 1 << 1
 	if (ImGui::RadioButton("Tertiary Weapon", t._equipped == 0x4))	t._equipped = 0x04;	// 1 << 2
@@ -699,4 +718,59 @@ void DrawTalismanEditorWindow()
 	}
 
 	ImGui::EndGroup();
+}
+#include "filtered_combobox.h"
+void DrawItemEditorWindow()
+{
+	ImGui::BeginChild("##ItemEditorWindow");
+
+	std::string amt_id = "Amount##";
+	std::string unk_id = "Unk##";
+
+	for (int i = 0; i < ITEM_MAX_COUNT; i++)
+	{
+		auto& item = sd::items[i];
+		std::string id = std::to_string(i);
+
+		int idx = static_cast<int>(item.id);
+		ImGui::ComboWithFilter(id.c_str(), &idx, ItemNames.data(), ItemNames.size());
+		item.id = static_cast<u16>(idx);
+
+		ImGui::PushItemWidth(300.0f);
+		ImGui::SameLine();
+		ImGui::InputScalar((amt_id + id).c_str(), ImGuiDataType_U16, &item.amount);
+
+		if (show_unknowns)
+		{
+			ImGui::SameLine();
+			ImGui::InputInt((unk_id + id).c_str(), &item.unk);
+		}
+		ImGui::PopItemWidth();
+	}
+
+	ImGui::EndChild();
+}
+
+#define VA_ARGS(...) , ##__VA_ARGS__
+#define Title(text, ...)\
+ImGui::PushFont(&heading);\
+ImGui::Text(text VA_ARGS(__VA_ARGS__));\
+ImGui::PopFont();
+
+void DrawHelpSection()
+{
+	static bool init = false;
+	static ImFont heading;
+
+	if (!init)
+	{
+		heading = *ImGui::GetFont();
+		//heading.FontSize *= 1.1f;
+		heading.Scale *= 1.1f;
+		init = true;
+	}
+
+	Title("1 Extracting your save");
+
+	ImGui::Text("Test");
 }

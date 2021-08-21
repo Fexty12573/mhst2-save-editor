@@ -17,6 +17,8 @@ using s64 = signed long long;
 #define WEAPON_MAX_COUNT 700
 #define ARMOR_MAX_COUNT 400
 #define TALISMAN_MAX_COUNT 200
+#define ITEM_MAX_COUNT 1999
+#define ITEMFLAG_MAX_COUNT 1780
 #define PLAYER_MAX_COUNT 31
 
 namespace sd
@@ -162,12 +164,20 @@ namespace sd
 		u16 skill2;
 		s32 unk4;
 	};
+	struct Item
+	{
+		u16 id;
+		u16 amount;
+		s32 unk;
+	};
 #pragma pack(pop)
 
 	extern Egg* eggs;
 	extern Monstie* monsties;
 	extern Player* players;
 	extern Talisman* talismans;
+	extern Item* items;
+	extern u8* itemflags;
 	extern u32 zenny;
 
 	inline void AllocateArrays()
@@ -176,11 +186,15 @@ namespace sd
 		monsties = new Monstie[MONSTIE_MAX_COUNT];
 		players = new Player[PLAYER_MAX_COUNT];
 		talismans = new Talisman[TALISMAN_MAX_COUNT];
+		items = new Item[ITEM_MAX_COUNT];
+		itemflags = new u8[ITEMFLAG_MAX_COUNT];
 
 		memset(eggs, 0, sizeof(Egg) * EGG_MAX_COUNT);
 		memset(monsties, 0, sizeof(Monstie) * MONSTIE_MAX_COUNT);
 		memset(players, 0, sizeof(Player) * PLAYER_MAX_COUNT);
 		memset(talismans, 0, sizeof(Talisman) * TALISMAN_MAX_COUNT);
+		memset(items, 0, sizeof(Item) * ITEM_MAX_COUNT);
+		memset(itemflags, 0, sizeof(u8) * ITEMFLAG_MAX_COUNT);
 	}
 
 	inline void DeleteArrays()
@@ -194,4 +208,6 @@ namespace sd
 	void ReadFile(const char* filepath);
 	void SaveFile(const char* filepath);
 	void SaveFileAs(const char* original, const char* new_path);
+
+	void AdjustItemflags();
 }

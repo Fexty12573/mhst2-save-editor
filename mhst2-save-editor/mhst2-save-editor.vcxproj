@@ -184,7 +184,12 @@
     <ClCompile Include="draw.cpp" />
     <ClCompile Include="EquipmentType.cpp" />
     <ClCompile Include="FieldAbilities.cpp" />
+    <ClCompile Include="filtered_combobox.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Genes.cpp" />
+    <ClCompile Include="Items.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Monsters.cpp" />
     <ClCompile Include="savedata.cpp" />
@@ -196,7 +201,9 @@
     <ClInclude Include="draw.h" />
     <ClInclude Include="EquipmentType.h" />
     <ClInclude Include="FieldAbilities.h" />
+    <ClInclude Include="filtered_combobox.h" />
     <ClInclude Include="Genes.h" />
+    <ClInclude Include="Items.h" />
     <ClInclude Include="Monsters.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="savedata.h" />

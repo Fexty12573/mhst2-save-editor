@@ -28,14 +28,21 @@ namespace ImGui
 		ImGui::PopStyleVar();
 	}
 
-	inline void svSetFont(const char* font_path)
+	inline void svSetFont(const char* font_path, float size = 20.0f)
 	{
 		auto& io = ImGui::GetIO();
 
 		io.Fonts->Clear();
-		io.Fonts->AddFontFromFileTTF(font_path, 20.0f, NULL, io.Fonts->GetGlyphRangesDefault());
+		io.Fonts->AddFontFromFileTTF(font_path, size, NULL, io.Fonts->GetGlyphRangesChineseFull());
 
 		ImGui::SFML::UpdateFontTexture();
+	}
+
+	inline void svAddFont(const char* font_path, float size = 20.0f)
+	{
+		auto& io = GetIO();
+
+		io.Fonts->AddFontFromFileTTF(font_path, size, nullptr, io.Fonts->GetGlyphRangesDefault());
 	}
 
 	void svSetupLightTheme()
