@@ -312,7 +312,7 @@ namespace ImGui
 
 
         if (value_changed)
-            MarkItemEdited(g.CurrentWindow->DC.LastItemId);
+            MarkItemEdited(g.LastActiveId);
 
         return value_changed;
     }

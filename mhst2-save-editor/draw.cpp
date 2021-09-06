@@ -221,6 +221,7 @@ void DrawSaveFileWindow()
 
 	static bool style_editor = false;
 
+#if defined(DEBUG)
 	ImGui::NewLine();
 	if (ImGui::Button("Style Editor"))
 	{
@@ -234,6 +235,7 @@ void DrawSaveFileWindow()
 		ImGui::ShowStyleEditor();
 		ImGui::End();
 	}
+#endif
 
 	ImGui::NewLine();
 
