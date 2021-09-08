@@ -15,5 +15,5 @@ namespace ImGui
 		size_t count,
 		int* selected_idx
 	);
-	bool ComboWithFilter(const char* label, int* current_item, const char* const* items, size_t items_count);
+	bool ComboWithFilter(const char* label, int* current_item, const char* const* items, size_t items_count, bool disabled = false);
 }

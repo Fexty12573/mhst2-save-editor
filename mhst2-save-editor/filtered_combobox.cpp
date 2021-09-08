@@ -189,7 +189,7 @@ namespace ImGui
         return ImVec2(lhs.x + rhs.x, lhs.y + rhs.y);
     }
 
-    bool ComboWithFilter(const char* label, int* current_item, const char* const* items, size_t items_count)
+    bool ComboWithFilter(const char* label, int* current_item, const char* const* items, size_t items_count, bool disabled)
     {
         ImGuiContext& g = *GImGui;
 
@@ -226,6 +226,12 @@ namespace ImGui
         ImVec2 pos = CursorPos + ImVec2(expected_w - sz, 0);
         const ImRect bb(pos, pos + size);
 
+        if (disabled)
+        {
+            ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(.8f, .8f, .8f, 1.0f));
+        }
+
         float ButtonTextAlignX = g.Style.ButtonTextAlign.x;
         g.Style.ButtonTextAlign.x = 0;
         if (ImGui::Button(comboButtonName, ImVec2(expected_w, 0)))
@@ -237,6 +243,12 @@ namespace ImGui
         bool hovered = IsItemHovered();
         bool active = IsItemActivated();
         bool pressed = IsItemClicked();
+
+        if (disabled)
+        {
+            ImGui::PopItemFlag();
+            ImGui::PopStyleColor();
+        }
 
         // Render
         //const ImU32 bg_col = GetColorU32((active && hovered) ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);

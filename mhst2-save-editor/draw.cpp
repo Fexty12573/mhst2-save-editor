@@ -10,11 +10,13 @@
 #include "Items.h"
 
 #include <imgui.h>
+#include <imgui_stdlib.h>
 #include <Windows.h>
 #include <cstdio>
-
 #include <fstream>
 #include <string>
+
+#include "filtered_combobox.h"
 
 void DrawSaveFileWindow();
 void DrawEggEditorWindow();
@@ -721,10 +723,25 @@ void DrawTalismanEditorWindow()
 
 	ImGui::EndGroup();
 }
-#include "filtered_combobox.h"
+
 void DrawItemEditorWindow()
 {
 	ImGui::BeginChild("##ItemEditorWindow");
+
+	std::string filter;
+	static int add_item_id = 0;
+	ImGui::ComboWithFilter("##add new item", &add_item_id, ItemNames.data(), ItemNames.size());
+
+	ImGui::SameLine();
+	if (ImGui::Button("Add Item") && add_item_id > 0)
+	{
+		sd::items[add_item_id - 1].id = add_item_id;
+	}
+
+	ImGui::SameLine(0.0f, 20.0f);
+	ImGui::PushItemWidth(300.0f);
+	ImGui::InputText("Filter", &filter);
+	ImGui::PopItemWidth();
 
 	std::string amt_id = "Amount##";
 	std::string unk_id = "Unk##";
@@ -734,8 +751,14 @@ void DrawItemEditorWindow()
 		auto& item = sd::items[i];
 		std::string id = std::to_string(i);
 
+		if (!filter.empty() && !std::strstr(ItemNames[item.id], filter.c_str()))
+			continue;
+
+		ImGui::Text("Slot %03d", i);
+		ImGui::SameLine();
+
 		int idx = static_cast<int>(item.id);
-		ImGui::ComboWithFilter(id.c_str(), &idx, ItemNames.data(), ItemNames.size());
+		ImGui::ComboWithFilter(id.c_str(), &idx, ItemNames.data(), ItemNames.size(), !i_know_what_im_doing);
 		item.id = static_cast<u16>(idx);
 
 		ImGui::PushItemWidth(300.0f);
