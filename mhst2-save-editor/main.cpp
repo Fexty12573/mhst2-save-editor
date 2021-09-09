@@ -30,8 +30,6 @@ int main(int argc, char* argv[])
 #endif
 	ImGui::svSetupLightTheme();
 
-	sd::AllocateArrays();
-
 	while (window.isOpen())
 	{
 		auto dt = clock.restart();
@@ -62,8 +60,6 @@ int main(int argc, char* argv[])
 		ImGui::SFML::Render(window);
 		window.display();
 	}
-
-	sd::DeleteArrays();
 
 	return 0;
 }

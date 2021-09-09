@@ -24,7 +24,7 @@ void DrawMonstieEditorWindow();
 void DrawPlayerEditorWindow();
 void DrawTalismanEditorWindow();
 void DrawItemEditorWindow();
-
+void DrawItemEditorWindow2();
 
 void DrawHelpSection();
 
@@ -58,6 +58,7 @@ void DrawMainWindow()
 	{
 		selected_tab = Tab::SAVE_FILE;
 	}
+
 	if (TabItemButton("Egg Editor"))
 	{
 		selected_tab = Tab::EGG_EDITOR;
@@ -90,6 +91,18 @@ void DrawMainWindow()
 		ImGui::Text("Enable the \"I know what I'm doing\" flag\nin the start menu to edit this.");
 	}
 
+	if (selected_tab != Tab::SAVE_FILE && !has_input_file)
+	{
+		ImGui::OpenPopup("##open file first");
+		selected_tab = Tab::SAVE_FILE;
+	}
+
+	if (ImGui::BeginPopup("##open file first"))
+	{
+		ImGui::Text("Open a file first!");
+		ImGui::EndPopup();
+	}
+
 	switch (selected_tab)
 	{
 	case Tab::SAVE_FILE: DrawSaveFileWindow(); break;
@@ -97,7 +110,7 @@ void DrawMainWindow()
 	case Tab::MONSTIE_EDITOR: DrawMonstieEditorWindow(); break;
 	case Tab::PLAYER_EDITOR: DrawPlayerEditorWindow(); break;
 	case Tab::TALISMAN_EDITOR: DrawTalismanEditorWindow(); break;
-	case Tab::ITEM_EDITOR: DrawItemEditorWindow(); break;
+	case Tab::ITEM_EDITOR: DrawItemEditorWindow2(); break;
 	case Tab::HELP_SECTION: DrawHelpSection(); break;
 	default: break;
 	}
@@ -105,6 +118,10 @@ void DrawMainWindow()
 
 void DrawSaveFileWindow()
 {
+	static bool saved = false;
+	static std::string save_button_text = "Save";
+	static std::string save_as_button_text = "Save As";
+
 	ImGui::InputText("Input", input_file, sizeof(input_file), ImGuiInputTextFlags_ReadOnly);
 	ImGui::SameLine();
 	
@@ -141,7 +158,7 @@ void DrawSaveFileWindow()
 		}
 	}
 
-	if (ImGui::Button("Save", ImVec2(150, 40)))
+	if (ImGui::Button(save_button_text.c_str(), ImVec2(150, 40)))
 	{
 		if (!has_input_file)
 		{
@@ -150,7 +167,15 @@ void DrawSaveFileWindow()
 		else
 		{
 			sd::SaveFile(input_file);
+			save_button_text = "Saved!";
+			saved = true;
 		}
+	}
+
+	if (saved && !ImGui::IsItemHovered())
+	{
+		saved = false;
+		save_button_text = "Save";
 	}
 
 	ImGui::SameLine();
@@ -223,7 +248,7 @@ void DrawSaveFileWindow()
 
 	static bool style_editor = false;
 
-#if defined(DEBUG)
+#if defined(_DEBUG)
 	ImGui::NewLine();
 	if (ImGui::Button("Style Editor"))
 	{
@@ -735,7 +760,7 @@ void DrawItemEditorWindow()
 	ImGui::SameLine();
 	if (ImGui::Button("Add Item") && add_item_id > 0)
 	{
-		sd::items[add_item_id - 1].id = add_item_id;
+		sd::items[add_item_id - 1].item.id = add_item_id;
 	}
 
 	ImGui::SameLine(0.0f, 20.0f);
@@ -743,12 +768,14 @@ void DrawItemEditorWindow()
 	ImGui::InputText("Filter", &filter);
 	ImGui::PopItemWidth();
 
+	ImGui::BeginChild("##ActualItemList");
+
 	std::string amt_id = "Amount##";
 	std::string unk_id = "Unk##";
 
 	for (int i = 0; i < ITEM_MAX_COUNT; i++)
 	{
-		auto& item = sd::items[i];
+		auto& item = sd::items[i].item;
 		std::string id = std::to_string(i);
 
 		if (!filter.empty() && !std::strstr(ItemNames[item.id], filter.c_str()))
@@ -774,6 +801,100 @@ void DrawItemEditorWindow()
 	}
 
 	ImGui::EndChild();
+	ImGui::EndChild();
+}
+
+enum ColumnID
+{
+	Slot,
+	ID,
+	Name,
+	Amount
+};
+
+void SortItems(ImGuiTableSortSpecs* specs);
+
+void DrawItemEditorWindow2()
+{
+	ImGui::BeginChild("##ItemEditorWindow");
+
+	std::string filter;
+	static int add_item_id = 0;
+	ImGui::ComboWithFilter("##add new item", &add_item_id, ItemNames.data(), ItemNames.size());
+
+	ImGui::SameLine();
+	if (ImGui::Button("Add Item") && add_item_id > 0)
+	{
+		sd::items[add_item_id - 1].item.id = add_item_id;
+	}
+
+	ImGui::SameLine(0.0f, 20.0f);
+	ImGui::PushItemWidth(300.0f);
+	ImGui::InputText("Filter", &filter);
+	ImGui::PopItemWidth();
+
+	ImGui::BeginChild("##ActualItemList");
+
+	if (ImGui::BeginTable("##itemlisttable", (show_unknowns ? 5 : 4)
+		, ImGuiTableFlags_Borders
+		| ImGuiTableFlags_Sortable
+		| ImGuiTableFlags_SizingFixedFit))
+	{
+		ImGui::TableSetupColumn("Slot", ImGuiTableColumnFlags_DefaultSort, 0, ColumnID::Slot);
+		ImGui::TableSetupColumn("ID", 0, 0, ColumnID::ID);
+		ImGui::TableSetupColumn("Item", 0, 0, ColumnID::Name);
+		ImGui::TableSetupColumn("Amount", 0, 0, ColumnID::Amount);
+		if (show_unknowns) ImGui::TableSetupColumn("Unknown", ImGuiTableColumnFlags_NoSort);
+		ImGui::TableHeadersRow();
+
+		if (auto sort_specs = ImGui::TableGetSortSpecs())
+			if (sort_specs->SpecsDirty)
+				SortItems(sort_specs);
+
+		for (int i = 0; i < ITEM_MAX_COUNT; i++)
+		{
+			auto& item = sd::items[i].item;
+			std::string id = std::to_string(sd::items[i].slot);
+
+			if (!filter.empty() && !std::strstr(ItemNames[item.id], filter.c_str()))
+				continue;
+
+			ImGui::TableNextRow();
+			ImGui::PushID(sd::items[i].slot);
+
+			ImGui::TableNextColumn();
+			ImGui::Text("%03d", sd::items[i].slot);
+			
+			ImGui::TableNextColumn();
+			ImGui::Text("%03d", item.id);
+
+			ImGui::TableNextColumn();
+
+			int idx = static_cast<int>(item.id);
+			ImGui::ComboWithFilter(id.c_str(), &idx, ItemNames.data(), ItemNames.size(), !i_know_what_im_doing);
+			item.id = static_cast<u16>(idx);
+
+			ImGui::TableNextColumn();
+
+			ImGui::PushItemWidth(300.0f);
+			ImGui::SameLine();
+			ImGui::InputScalar("##Amount", ImGuiDataType_U16, &item.amount);
+
+			if (show_unknowns)
+			{
+				ImGui::TableNextColumn();
+				ImGui::InputInt("##Unknown", &item.unk);
+			}
+			ImGui::PopItemWidth();
+
+			ImGui::PopID();
+		}
+
+		ImGui::EndTable();
+	}
+
+	ImGui::EndChild();
+	ImGui::EndChild();
 }
 
 #define VA_ARGS(...) , ##__VA_ARGS__
@@ -798,4 +919,20 @@ void DrawHelpSection()
 	Title("1 Extracting your save");
 
 	ImGui::Text("Test");
+}
+
+void SortItems(ImGuiTableSortSpecs* specs)
+{
+	auto cspecs = specs->Specs;
+
+	switch (cspecs->ColumnUserID)
+	{
+	case ColumnID::Slot: sd::SortItemsBySlot(bool(cspecs->SortDirection - 1)); break;
+	case ColumnID::ID: sd::SortItemsByID(bool(cspecs->SortDirection - 1)); break;
+	case ColumnID::Name: sd::SortItemsByName(bool(cspecs->SortDirection - 1)); break;
+	case ColumnID::Amount: sd::SortItemsByAmount(bool(cspecs->SortDirection - 1)); break;
+	default: break;
+	}
+
+	specs->SpecsDirty = false;
 }

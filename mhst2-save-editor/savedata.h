@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string.h>
+#include <vector>
 
 using u8 = unsigned char;
 using s8 = signed char;
@@ -166,48 +167,34 @@ namespace sd
 	};
 	struct Item
 	{
-		u16 id;
-		u16 amount;
-		s32 unk;
+		struct
+		{
+			u16 id;
+			u16 amount;
+			s32 unk;
+		} item;
+
+		u32 slot;
 	};
 #pragma pack(pop)
 
-	extern Egg* eggs;
-	extern Monstie* monsties;
-	extern Player* players;
-	extern Talisman* talismans;
-	extern Item* items;
-	extern u8* itemflags;
 	extern u32 zenny;
 
-	inline void AllocateArrays()
-	{
-		eggs = new Egg[EGG_MAX_COUNT];
-		monsties = new Monstie[MONSTIE_MAX_COUNT];
-		players = new Player[PLAYER_MAX_COUNT];
-		talismans = new Talisman[TALISMAN_MAX_COUNT];
-		items = new Item[ITEM_MAX_COUNT];
-		itemflags = new u8[ITEMFLAG_MAX_COUNT];
-
-		memset(eggs, 0, sizeof(Egg) * EGG_MAX_COUNT);
-		memset(monsties, 0, sizeof(Monstie) * MONSTIE_MAX_COUNT);
-		memset(players, 0, sizeof(Player) * PLAYER_MAX_COUNT);
-		memset(talismans, 0, sizeof(Talisman) * TALISMAN_MAX_COUNT);
-		memset(items, 0, sizeof(Item) * ITEM_MAX_COUNT);
-		memset(itemflags, 0, sizeof(u8) * ITEMFLAG_MAX_COUNT);
-	}
-
-	inline void DeleteArrays()
-	{
-		delete[] eggs;
-		delete[] monsties;
-		delete[] players;
-		delete[] talismans;
-	}
+	extern std::vector<Egg> eggs;
+	extern std::vector<Monstie> monsties;
+	extern std::vector<Player> players;
+	extern std::vector<Talisman> talismans;
+	extern std::vector<Item> items;
+	extern std::vector<u8> itemflags;
 	
 	void ReadFile(const char* filepath);
 	void SaveFile(const char* filepath);
 	void SaveFileAs(const char* original, const char* new_path);
 
 	void AdjustItemflags();
+
+	void SortItemsBySlot(bool descending = false);
+	void SortItemsByID(bool descending = false);
+	void SortItemsByName(bool descending = false);
+	void SortItemsByAmount(bool descending = false);
 }
